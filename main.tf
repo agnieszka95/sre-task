@@ -1,3 +1,5 @@
+#define the Google provider for GCP
+
 terraform {
   required_providers {
     google = {
@@ -6,6 +8,8 @@ terraform {
     }
   }
 }
+
+# Configure the authentication and authorisation of the cluster, as well as how to fetch the details for the kubeconfig file.
 
 module "gke_auth" {
   source = "terraform-google-modules/kubernetes-engine/google//modules/auth"
@@ -16,11 +20,17 @@ module "gke_auth" {
   cluster_name = module.gke.name
 }
 
+# Define a local file that will store the necessary info such as certificate, user and endpoint to access the cluster.
+# This is kubeconfig file for the cluster
+  
 resource "local_file" "kubeconfig" {
   content  = module.gke_auth.kubeconfig_raw
   filename = "kubeconfig-${var.env_name}"
 }
 
+# The GCP networking module creates a separate VPC dedicated to the cluster.
+# It also sets up separate subnet ranges for the pods and services.
+  
 module "gcp-network" {
   source       = "terraform-google-modules/network/google"
   version      = "6.0.0"
@@ -57,6 +67,8 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(module.gke.ca_certificate)
 }
 
+# Define the cluster and node pool specifications such as the name, regions, storage, instance type, images, etc.
+  
 module "gke" {
   source                 = "terraform-google-modules/kubernetes-engine/google//modules/private-cluster"
   version                = "24.1.0"
