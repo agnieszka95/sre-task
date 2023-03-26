@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testtask
+spec:
+  selector:
+    matchLabels:
+      name: testtask
+  template:
+    metadata:
+      labels:
+        name: testtask
+    spec:
+      containers:
+      - name: app
+        image: gcr.io/my-project/docker-img
+        ports:
+          - containerPort: 80
